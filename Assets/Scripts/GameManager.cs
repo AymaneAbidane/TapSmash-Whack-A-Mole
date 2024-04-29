@@ -140,29 +140,34 @@ public class GameManager : MonoBehaviour
     }
 
     void Update()
+{
+    if (playing)
     {
-        if (playing)
+        // Update time.
+        timeRemaining -= Time.deltaTime;
+        if (timeRemaining <= 0)
         {
-            // Update time.
-            timeRemaining -= Time.deltaTime;
-            if (timeRemaining <= 0)
+            timeRemaining = 0;
+            GameOver(0);
+        }
+        timeText.text = $"{(int)timeRemaining / 60}:{(int)timeRemaining % 60:D2}";
+        
+        // Calculate the threshold based on score and ensure a minimum of 2 minutes of gameplay.
+        int moleThreshold = Mathf.Max(120, score / 10);
+
+        // Check if we need to start any more moles.
+        if (currentMoles.Count <= moleThreshold)
+        {
+            // Choose a random mole.
+            int index = Random.Range(0, moles.Count);
+            // Doesn't matter if it's already doing something, we'll just try again next frame.
+            if (!currentMoles.Contains(moles[index]))
             {
-                timeRemaining = 0;
-                GameOver(0);
-            }
-            timeText.text = $"{(int)timeRemaining / 60}:{(int)timeRemaining % 60:D2}";
-            // Check if we need to start any more moles.
-            if (currentMoles.Count <= (score / 10))
-            {
-                // Choose a random mole.
-                int index = Random.Range(0, moles.Count);
-                // Doesn't matter if it's already doing something, we'll just try again next frame.
-                if (!currentMoles.Contains(moles[index]))
-                {
-                    currentMoles.Add(moles[index]);
-                    moles[index].Activate(score / 10);
-                }
+                currentMoles.Add(moles[index]);
+                moles[index].Activate(score / 10);
             }
         }
     }
+}
+
 }
