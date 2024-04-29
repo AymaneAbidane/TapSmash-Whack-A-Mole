@@ -11,7 +11,7 @@ public class MoleManager : MonoBehaviour
     [SerializeField] private Sprite moleHatHit;
 
     // The offset of the sprite to hide it.
-    private Vector2 startPosition = new Vector2(0f, -2.56f);
+    private Vector2 startPosition = new(0f, -0.8f);
     private Vector2 endPosition = Vector2.zero;
     // How long it takes to show a mole.
     private float showDuration = 0.5f;
@@ -24,6 +24,11 @@ public class MoleManager : MonoBehaviour
     private float bombRate = 0f;
     private int lives;
     private int moleIndex = 0;
+    [SerializeField] private int timePenaltyValue = 5;
+    [SerializeField] private int standardMoleScoreValue = 10;
+    [SerializeField] private int hardMoleScoreValue = 20;
+    [SerializeField] float yOffsetScoreFloatingText = .5f;
+    [SerializeField] float yOffsetTimeFloatingText = 1.0f;
 
     private SpriteRenderer spriteRenderer;
     private BoxCollider2D boxCollider2D;
@@ -33,7 +38,7 @@ public class MoleManager : MonoBehaviour
     private Vector2 boxOffsetHidden;
     private Vector2 boxSizeHidden;
 
-    private GameManager gameManager;
+    private static GameManager _gameManagerInstance;
 
     private void Awake()
     {
@@ -45,6 +50,15 @@ public class MoleManager : MonoBehaviour
         boxSize = boxCollider2D.size;
         boxOffsetHidden = new Vector2(boxOffset.x, -startPosition.y / 2f);
         boxSizeHidden = new Vector2(boxSize.x, 0f);
+
+        if (_gameManagerInstance == null)
+        {
+            _gameManagerInstance = FindObjectOfType<GameManager>();
+            if (_gameManagerInstance == null)
+            {
+                Debug.LogError("No GameManager found in the scene.");
+            }
+        }
     }
 
     public void Activate(int level)
@@ -62,10 +76,12 @@ public class MoleManager : MonoBehaviour
             {
                 case MoleType.Standard:
                     spriteRenderer.sprite = moleHit;
-                    //Stop the animation
                     StopAllCoroutines();
                     StartCoroutine(QuickHide());
-                    // Turn off hittable so that we can't keep tapping
+                    _gameManagerInstance.AddScore(moleIndex, standardMoleScoreValue);
+                    Vector3 standardTextPosition = transform.position + new Vector3(0f, yOffsetScoreFloatingText, 0f); // yOffset is the distance above the object's center
+                    _gameManagerInstance.ShowScoreFloatingText("+" + standardMoleScoreValue.ToString(), standardTextPosition);
+
                     isHitable = false;
                     break;
                 case MoleType.HardHat:
@@ -77,23 +93,24 @@ public class MoleManager : MonoBehaviour
                     else
                     {
                         spriteRenderer.sprite = moleHatHit;
-                        //Stop the animation
                         StopAllCoroutines();
                         StartCoroutine(QuickHide());
-                        // Turn off hittable so that we can't keep tapping
+                        _gameManagerInstance.AddScore(moleIndex, hardMoleScoreValue);
+                        Vector3 hardTextPosition = transform.position + new Vector3(0f, yOffsetScoreFloatingText, 0f); // yOffset is the distance above the object's center
+                        _gameManagerInstance.ShowScoreFloatingText("+" + hardMoleScoreValue.ToString(), hardTextPosition);
+
                         isHitable = false;
                     }
                     break;
                 case MoleType.Bomb:
-                    // Game over, 1 for bomb.
-                    gameManager.GameOver(1);
+                    _gameManagerInstance.GameOver(1);
                     break;
                 default:
                     break;
             }
-            
         }
     }
+
 
     private IEnumerator ShowHide(Vector2 start, Vector2 end)
     {
@@ -145,7 +162,10 @@ public class MoleManager : MonoBehaviour
         {
             isHitable = false;
             // We only give time penalty if it isn't a bomb.
-            gameManager.Missed(moleIndex, moleType != MoleType.Bomb);
+            _gameManagerInstance.Missed(moleIndex, moleType != MoleType.Bomb);
+            Vector3 timeTextPosition = transform.position + new Vector3(0f, yOffsetTimeFloatingText, 0f); // yOffset is the distance above the object's center
+            _gameManagerInstance.ShowTimeFloatingText("-" + timePenaltyValue.ToString() + "s", timeTextPosition);
+
         }
     }
 
@@ -200,17 +220,15 @@ public class MoleManager : MonoBehaviour
     // As the level progresses the game gets harder.
     private void SetLevel(int level)
     {
-        // As level increases increse the bomb rate to 0.25 at level 10.
-        bombRate = Mathf.Min(level * 0.025f, 0.25f);
-
-        // Increase the amounts of HardHats until 100% at level 40.
-        hardRate = Mathf.Min(level * 0.025f, 1f);
-
-        // Duration bounds get quicker as we progress. No cap on insanity.
-        float durationMin = Mathf.Clamp(1 - level * 0.1f, 0.01f, 1f);
-        float durationMax = Mathf.Clamp(2 - level * 0.1f, 0.01f, 2f);
+        float durationMin = Mathf.Clamp(1 - level * 0.1f, 0.5f, 1f);
+        float durationMax = Mathf.Clamp(2 - level * 0.1f, 1f, 2f);
         duration = Random.Range(durationMin, durationMax);
+
+        bombRate = Mathf.Min(level * 0.02f, 0.1f);
+
+        hardRate = Mathf.Min(level * 0.015f, 0.5f);
     }
+
 
     // Used by the game manager to uniquely identify moles. 
     public void SetIndex(int index)

@@ -13,16 +13,19 @@ public class GameManager : MonoBehaviour
     //[SerializeField] private GameObject bombText;
     [SerializeField] private TMPro.TextMeshProUGUI timeText;
     [SerializeField] private TMPro.TextMeshProUGUI scoreText;
+    [SerializeField] private GameObject scoreFloatingTextPrefab;
+    [SerializeField] private GameObject timeFloatingTextPrefab;
 
     // Hardcoded variables you may want to tune.
-    private float startingTime = 30f;
+    private float startingTime = 60f;
 
     // Global variables
     private float timeRemaining;
-    private HashSet<MoleManager> currentMoles = new HashSet<MoleManager>();
+    [SerializeField] private HashSet<MoleManager> currentMoles = new();
     private int score;
     private bool playing = false;
 
+    private Coroutine gameOverCoroutine;
 
     private void Start()
     {
@@ -63,45 +66,77 @@ public class GameManager : MonoBehaviour
 
     public void GameOver(int type)
     {
+        // Stop the previous coroutine if it's running
+        if (gameOverCoroutine != null)
+        {
+            StopCoroutine(gameOverCoroutine);
+        }
+
         // Show the message.
         if (type == 0)
         {
             gameOverUI.SetActive(true);
+            // Start the coroutine to deactivate gameOverUI after 1.5 seconds
+            gameOverCoroutine = StartCoroutine(DeactivateGameOverUI());
         }
         else
         {
-            //bombText.SetActive(true);
+            
         }
+
         // Hide all moles.
         foreach (MoleManager mole in moles)
         {
             mole.StopGame();
         }
+
         // Stop the game and show the start UI.
         playing = false;
         playButton.SetActive(true);
     }
 
-    public void AddScore(int moleIndex)
+    private IEnumerator DeactivateGameOverUI()
+    {
+        yield return new WaitForSeconds(1.5f); // Wait for 1.5 seconds
+        gameOverUI.SetActive(false); // Deactivate the game over UI
+        GameOver(1); // Call GameOver with type 1
+    }
+
+    public void AddScore(int moleIndex, int scoreValue)
     {
         // Add and update score.
-        score += 1;
+        score += scoreValue;
         scoreText.text = $"{score}";
-        // Increase time by a little bit.
-        timeRemaining += 1;
         // Remove from active moles.
         currentMoles.Remove(moles[moleIndex]);
     }
 
     public void Missed(int moleIndex, bool isMole)
     {
+        // Decrease time if it's a mole.
         if (isMole)
         {
-            // Decrease time by a little bit.
             timeRemaining -= 2;
         }
         // Remove from active moles.
         currentMoles.Remove(moles[moleIndex]);
+    }
+
+    public void ShowScoreFloatingText(string text, Vector2 position)
+    {
+        if (scoreFloatingTextPrefab)
+        {
+            GameObject prefab = Instantiate(scoreFloatingTextPrefab, position, Quaternion.identity);
+            prefab.GetComponentInChildren<TextMesh>().text = text;
+        }
+    }
+    public void ShowTimeFloatingText(string text, Vector2 position)
+    {
+        if (timeFloatingTextPrefab)
+        {
+            GameObject prefab = Instantiate(timeFloatingTextPrefab, position, Quaternion.identity);
+            prefab.GetComponentInChildren<TextMesh>().text = text;
+        }
     }
 
     void Update()
