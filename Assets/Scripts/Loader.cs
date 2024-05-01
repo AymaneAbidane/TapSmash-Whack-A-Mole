@@ -6,7 +6,10 @@ using UnityEngine.SceneManagement;
 public static class Loader {
     public enum Scene {
         MainMenuScene,
-        GameScene,
+        ChallengesScene,
+        BeginnerChallengeScene,
+        SkilledChallengeScene,
+        MasterChallengeScene,
         LoadingScene
     }
     static Scene targetScene;

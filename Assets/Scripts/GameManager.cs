@@ -1,55 +1,98 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField] private List<MoleManager> moles;
+    public static GameManager Instance { get; private set; }
 
-    [Header("UI")]
-    [SerializeField] private GameObject playButton;
-    [SerializeField] private GameObject scoreAndTimeUI;
-    [SerializeField] private GameObject gameOverUI;
-    //[SerializeField] private GameObject bombText;
-    [SerializeField] private TMPro.TextMeshProUGUI timeText;
-    [SerializeField] private TMPro.TextMeshProUGUI scoreText;
-    [SerializeField] private GameObject scoreFloatingTextPrefab;
-    [SerializeField] private GameObject timeFloatingTextPrefab;
+    public event EventHandler OnStateChanged;
+    public event EventHandler OnGamePaused;
+    public event EventHandler OnGameUnpaused;
 
-    // Hardcoded variables you may want to tune.
-    private float startingTime = 60f;
+    private enum State { WaitingToStart, GamePlaying, GameOver }
 
-    // Global variables
-    private float timeRemaining;
-    [SerializeField] private HashSet<MoleManager> currentMoles = new();
-    private int score;
-    private bool playing = false;
+    private State state;
+    private HashSet<Mole> currentMoles = new HashSet<Mole>();
 
-    private Coroutine gameOverCoroutine;
+    private bool isGamePaused = false;
+    private float waitingToStartTimer = 1f;
+    private float gamePlayingTimer;
+    private float gamePlayingTimerMax = 200f;
+    private float nextMoleSpawnTime;
 
+    [SerializeField] private List<Mole> moles;
+    [SerializeField] private TMPro.TextMeshProUGUI molesPerSecondText;
+    [SerializeField] private Button resumeButton;
+    [SerializeField] private float timeBetweenMoleSpawns = 2f;
+
+    private void Awake()
+    {
+        Instance = this;
+        state = State.WaitingToStart;
+        resumeButton.onClick.AddListener(() =>
+        {
+            TogglePauseGame();
+        });
+    }
     private void Start()
     {
-        // Clear the list to ensure it's empty before adding objects
-        moles.Clear();
 
-        // Find all objects of type MoleManager in the scene and add them to the list
-        MoleManager[] foundMoles = FindObjectsOfType<MoleManager>();
-        moles.AddRange(foundMoles);
+        //List<Mole> _moles = MoleManager.Instance.GetMoles() as List<Mole>;
+        //moles.AddRange(_moles);
 
-        //foreach (MoleManager mole in moles)
-        //{
-        //}
-        gameOverUI.SetActive(false);
-        scoreAndTimeUI.SetActive(false);
+        // Find all Mole instances in the scene and add them to the moles list
+        FindAllMoleInScene();
+
+        nextMoleSpawnTime = Time.time + timeBetweenMoleSpawns;
+        HideAndClearMoles();
     }
-    public void StartGame()
+
+    void Update()
     {
-        // Hide/show the UI elements we don't/do want to see.
-        playButton.SetActive(false);
-        gameOverUI.SetActive(false);
-        //bombText.SetActive(false);
-        scoreAndTimeUI.SetActive(true);
-        // Hide all the visible moles.
+        switch (state) {
+            case State.WaitingToStart:
+                waitingToStartTimer -= Time.deltaTime;
+                if (waitingToStartTimer < 0f) {
+                    state = State.GamePlaying;
+                    OnStateChanged?.Invoke(this, EventArgs.Empty);
+                }
+                break;
+            case State.GamePlaying:
+                gamePlayingTimer -= Time.deltaTime;
+
+                // Print the time with three numbers after the decimal point
+                molesPerSecondText.text = $"{gamePlayingTimer / 60f:0.000}";
+
+                // Check if it's time to start another mole
+                if (Time.time >= nextMoleSpawnTime)
+                {
+                    // Choose a random mole
+                    int index = UnityEngine.Random.Range(0, moles.Count);
+                    // Doesn't matter if it's already doing something, we'll just try again next frame.
+                    if (!currentMoles.Contains(moles[index]))
+                    {
+                        currentMoles.Add(moles[index]);
+                        moles[index].Activate(1);
+                        // Set the time for the next mole spawn
+                        nextMoleSpawnTime = Time.time + timeBetweenMoleSpawns;
+                    }
+                }
+                break;
+            case State.GameOver:
+                
+                break;
+        }
+    }
+    private void FindAllMoleInScene()
+    {
+        Mole[] foundMoles = FindObjectsOfType<Mole>();
+        moles.AddRange(foundMoles);
+    }
+    private void HideAndClearMoles()
+    {
         for (int i = 0; i < moles.Count; i++)
         {
             moles[i].Hide();
@@ -57,117 +100,43 @@ public class GameManager : MonoBehaviour
         }
         // Remove any old game state.
         currentMoles.Clear();
-        // Start with 30 seconds.
-        timeRemaining = startingTime;
-        score = 0;
-        scoreText.text = "0";
-        playing = true;
+    }
+    public bool IsGamePlaying()
+    {
+        return state == State.GamePlaying;
+    }
+    
+    public bool IsGameOver()
+    {
+        return state == State.GameOver;
+    }
+    
+    public float GetGamePlayinTimerNormalized()
+    {
+        return 1 - (gamePlayingTimer / gamePlayingTimerMax);
     }
 
-    public void GameOver(int type)
+    public void TogglePauseGame()
     {
-        // Stop the previous coroutine if it's running
-        if (gameOverCoroutine != null)
+        isGamePaused = !isGamePaused;
+        if (isGamePaused)
         {
-            StopCoroutine(gameOverCoroutine);
-        }
-
-        // Show the message.
-        if (type == 0)
-        {
-            gameOverUI.SetActive(true);
-            // Start the coroutine to deactivate gameOverUI after 1.5 seconds
-            gameOverCoroutine = StartCoroutine(DeactivateGameOverUI());
+            Time.timeScale = 0f;
+            OnGamePaused?.Invoke(this, EventArgs.Empty);
         }
         else
         {
-            
+            Time.timeScale = 1f;
+            OnGameUnpaused?.Invoke(this, EventArgs.Empty);
         }
-
-        // Hide all moles.
-        foreach (MoleManager mole in moles)
-        {
-            mole.StopGame();
-        }
-
-        // Stop the game and show the start UI.
-        playing = false;
-        playButton.SetActive(true);
     }
-
-    private IEnumerator DeactivateGameOverUI()
+    public void GameOver()
     {
-        yield return new WaitForSeconds(1.5f); // Wait for 1.5 seconds
-        gameOverUI.SetActive(false); // Deactivate the game over UI
-        GameOver(1); // Call GameOver with type 1
+        state = State.GameOver;
+        OnStateChanged?.Invoke(this, EventArgs.Empty);
     }
-
-    public void AddScore(int moleIndex, int scoreValue)
+    public string GetMolesPerSecond()
     {
-        // Add and update score.
-        score += scoreValue;
-        scoreText.text = $"{score}";
-        // Remove from active moles.
-        currentMoles.Remove(moles[moleIndex]);
+        return molesPerSecondText.ToString();
     }
-
-    public void Missed(int moleIndex, bool isMole)
-    {
-        // Decrease time if it's a mole.
-        if (isMole)
-        {
-            timeRemaining -= 2;
-        }
-        // Remove from active moles.
-        currentMoles.Remove(moles[moleIndex]);
-    }
-
-    public void ShowScoreFloatingText(string text, Vector2 position)
-    {
-        if (scoreFloatingTextPrefab)
-        {
-            GameObject prefab = Instantiate(scoreFloatingTextPrefab, position, Quaternion.identity);
-            prefab.GetComponentInChildren<TextMesh>().text = text;
-        }
-    }
-    public void ShowTimeFloatingText(string text, Vector2 position)
-    {
-        if (timeFloatingTextPrefab)
-        {
-            GameObject prefab = Instantiate(timeFloatingTextPrefab, position, Quaternion.identity);
-            prefab.GetComponentInChildren<TextMesh>().text = text;
-        }
-    }
-
-    void Update()
-{
-    if (playing)
-    {
-        // Update time.
-        timeRemaining -= Time.deltaTime;
-        if (timeRemaining <= 0)
-        {
-            timeRemaining = 0;
-            GameOver(0);
-        }
-        timeText.text = $"{(int)timeRemaining / 60}:{(int)timeRemaining % 60:D2}";
-        
-        // Calculate the threshold based on score and ensure a minimum of 2 minutes of gameplay.
-        int moleThreshold = Mathf.Max(120, score / 10);
-
-        // Check if we need to start any more moles.
-        if (currentMoles.Count <= moleThreshold)
-        {
-            // Choose a random mole.
-            int index = Random.Range(0, moles.Count);
-            // Doesn't matter if it's already doing something, we'll just try again next frame.
-            if (!currentMoles.Contains(moles[index]))
-            {
-                currentMoles.Add(moles[index]);
-                moles[index].Activate(score / 10);
-            }
-        }
-    }
-}
-
 }
