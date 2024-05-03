@@ -13,7 +13,7 @@ public class Mole : MonoBehaviour
     //{
     //    MoleManager.Instance.UnregisterMole(this);
     //}
-
+    public static Mole Instance { get; private set; }
     public enum MoleType { Standard, HardHat, Bomb };
 
     private MoleType moleType;
@@ -40,8 +40,8 @@ public class Mole : MonoBehaviour
     private Vector2 boxColliderSizeHidden;
 
     // How long it takes to show a mole
-    private float showMoleDuration = 1f;
-    private float showMoleFullAnimationDuration = 2f;
+    private float showMoleDuration = .5f;
+    private float showMoleFullAnimationDuration = 1.5f;
     private float hardMoleRate = 0.25f;
     private float bombRate = 0f;
     private int moleLives;
@@ -50,6 +50,7 @@ public class Mole : MonoBehaviour
 
     private void Awake()
     {
+        Instance = this;
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         boxCollider2D = GetComponent<BoxCollider2D>();
@@ -75,6 +76,7 @@ public class Mole : MonoBehaviour
             {
                 case MoleType.Standard:
                     spriteRenderer.sprite = moleHitedSprite;
+                    GameManager.Instance.MoleHited(moleIndex);
                     StopAllCoroutines();
                     StartCoroutine(QuickHide());
                     isHitable = false;
@@ -88,6 +90,7 @@ public class Mole : MonoBehaviour
                     else
                     {
                         spriteRenderer.sprite = moleHatHitedSprite;
+                        GameManager.Instance.MoleHited(moleIndex);
                         StopAllCoroutines();
                         StartCoroutine(QuickHide());
                         isHitable = false;
@@ -154,7 +157,10 @@ public class Mole : MonoBehaviour
         if (isHitable)
         {
             isHitable = false;
-            GameManager.Instance.GameOver();
+            if (moleType != MoleType.Bomb)
+            {
+                GameManager.Instance.MoleMissed(moleIndex, moleType != MoleType.Bomb);
+            }
         }
     }
 

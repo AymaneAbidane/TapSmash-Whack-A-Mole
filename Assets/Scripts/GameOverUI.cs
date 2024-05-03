@@ -9,11 +9,11 @@ public class GameOverUI : MonoBehaviour
     [SerializeField] private Button tryAgainButton;
     [SerializeField] private Button challengesButton;
     [SerializeField] private Button mainMenuButton;
-    //[SerializeField] private TextMeshProUGUI bestMolesPerSecondText;
+    [SerializeField] private TextMeshProUGUI bestMolesPerSecondText;
     [SerializeField] private TextMeshProUGUI molesPerSecondText;
-    //[SerializeField] private TextMeshProUGUI newBestMolesPerSecondText;
+    [SerializeField] private Image newBestMolesPerSecondText;
 
-    [SerializeField] private bool iSNewBestMolesPerSecondText = false;
+    [SerializeField] private bool isNewBestMolesPerSecondText = false;
 
     private void Awake()
     {
@@ -37,7 +37,25 @@ public class GameOverUI : MonoBehaviour
         if (GameManager.Instance.IsGameOver())
         {
             Show();
-            molesPerSecondText.text = GameManager.Instance.GetMolesPerSecond();
+
+            // Display current score
+            molesPerSecondText.text = GameManager.Instance.GetMolesPerSecond().ToString("F3");
+
+            // Display high score
+            //bestMolesPerSecondText.text = GameManager.Instance.GetGamePlayingHighTimer().ToString("F3");
+            bestMolesPerSecondText.text = "BEST " + GameManager.Instance.GetGamePlayingHighTimer().ToString("F3") + " MOLES/S";
+
+            // Check if the current score is higher than the high score
+            if (GameManager.Instance.GetIsNewBest())
+            {
+                // Show the new best score panel
+                ShowNewBestMolesPerSecondText();
+            }
+            else
+            {
+                // Hide the new best score panel if the current score is not higher
+                HideNewBestMolesPerSecondText();
+            }
         }
         else
         {
@@ -53,5 +71,13 @@ public class GameOverUI : MonoBehaviour
     private void Show()
     {
         gameObject.SetActive(true);
+    }
+    private void ShowNewBestMolesPerSecondText()
+    {
+        newBestMolesPerSecondText.gameObject.SetActive(true);
+    }
+    private void HideNewBestMolesPerSecondText()
+    {
+        newBestMolesPerSecondText.gameObject.SetActive(false);
     }
 }
