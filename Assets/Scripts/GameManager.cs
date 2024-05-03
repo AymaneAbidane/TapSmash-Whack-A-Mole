@@ -37,7 +37,6 @@ public class GameManager : MonoBehaviour {
     private int levelDifficulty;
 
     private void Awake() {
-        challengeDataHolder = FindObjectOfType<ChallengeDataHolder>(true);
         Instance = this;
         state = State.WaitingToStart;
         resumeButton.onClick.AddListener(() => {
@@ -46,6 +45,8 @@ public class GameManager : MonoBehaviour {
     }
 
     private void Start() {
+        challengeDataHolder = FindObjectOfType<ChallengeDataHolder>(true);
+
         levelDifficultySO = challengeDataHolder.GetLevelDifficultySO();
         FindAllMoleInScene();
         nextMoleSpawnTime = Time.time + timeBetweenMoleSpawns;

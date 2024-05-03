@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: VeryHardLevelDifficultySO
   m_EditorClassIdentifier: 
   timeBetweenMoleSpawns: 0.5
-  levelDifficulty: 100
+  levelDifficulty: 20

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: HardLevelDifficultySO
   m_EditorClassIdentifier: 
   timeBetweenMoleSpawns: 1
-  levelDifficulty: 50
+  levelDifficulty: 10
