@@ -1,13 +1,10 @@
 using System;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
-{
+public class GameManager : MonoBehaviour {
     public static GameManager Instance { get; private set; }
 
     public event EventHandler OnStateChanged;
@@ -21,6 +18,8 @@ public class GameManager : MonoBehaviour
 
     private const string HIGH_SCORE_KEY = "HighScore";
 
+    public LevelDifficultySO levelDifficultySO;
+
     private bool isGamePaused = false;
     private float waitingToStartTimer = 1f;
     private float gamePlayingHighTimer;
@@ -29,38 +28,34 @@ public class GameManager : MonoBehaviour
     private float gamePlayingTimerMax = 200f;
     private float nextMoleSpawnTime;
 
-
     [SerializeField] private List<Mole> moles;
     [SerializeField] private TMPro.TextMeshProUGUI molesPerSecondText;
     [SerializeField] private TextMeshProUGUI bestMolesPerSecondText;
     [SerializeField] private Button resumeButton;
-    [SerializeField] private float timeBetweenMoleSpawns = 1.5f;
+    [SerializeField] private ChallengeDataHolder challengeDataHolder;
+    private float timeBetweenMoleSpawns;
+    private int levelDifficulty;
 
-    private void Awake()
-    {
+    private void Awake() {
+        challengeDataHolder = FindObjectOfType<ChallengeDataHolder>(true);
         Instance = this;
         state = State.WaitingToStart;
-        resumeButton.onClick.AddListener(() =>
-        {
+        resumeButton.onClick.AddListener(() => {
             TogglePauseGame();
         });
     }
-    private void Start()
-    {
 
-        //List<Mole> _moles = MoleManager.Instance.GetMoles() as List<Mole>;
-        //moles.AddRange(_moles);
-
-        // Find all Mole instances in the scene and add them to the moles list
+    private void Start() {
+        levelDifficultySO = challengeDataHolder.GetLevelDifficultySO();
         FindAllMoleInScene();
-
         nextMoleSpawnTime = Time.time + timeBetweenMoleSpawns;
         HideAndClearMoles();
         LoadHighScore();
+        SetLevelDifficulties();
     }
 
-    void Update()
-    {
+
+    void Update() {
         switch (state) {
             case State.WaitingToStart:
                 waitingToStartTimer -= Time.deltaTime;
@@ -72,145 +67,119 @@ public class GameManager : MonoBehaviour
             case State.GamePlaying:
                 gamePlayingTimer += Time.deltaTime;
 
-                // Print the time with three numbers after the decimal point
                 molesPerSecondText.text = gamePlayingTimer.ToString("F3");
                 bestMolesPerSecondText.text = GetGamePlayingHighTimer().ToString("F3");
-                //molesPerSecondText.text = Mathf.Abs(gamePlayingTimer).ToString("F3");
 
-                // Check if it's time to start another mole
-                if (Time.time >= nextMoleSpawnTime)
-                {
-                    // Choose a random mole
+                if (Time.time >= nextMoleSpawnTime) {
                     int index = UnityEngine.Random.Range(0, moles.Count);
-                    // Doesn't matter if it's already doing something, we'll just try again next frame.
-                    if (!currentMoles.Contains(moles[index]))
-                    {
+                    if (!currentMoles.Contains(moles[index])) {
                         currentMoles.Add(moles[index]);
-                        moles[index].Activate(1);
-                        // Set the time for the next mole spawn
+                        moles[index].Activate(levelDifficulty);
                         nextMoleSpawnTime = Time.time + timeBetweenMoleSpawns;
                     }
                 }
                 break;
             case State.GameOver:
-                
                 break;
         }
     }
-    private void FindAllMoleInScene()
-    {
+
+    private void FindAllMoleInScene() {
         Mole[] foundMoles = FindObjectsOfType<Mole>();
         moles.AddRange(foundMoles);
     }
-    private void HideAndClearMoles()
-    {
-        for (int i = 0; i < moles.Count; i++)
-        {
+
+    private void HideAndClearMoles() {
+        for (int i = 0; i < moles.Count; i++) {
             moles[i].Hide();
             moles[i].SetIndex(i);
         }
-        // Remove any old game state.
         currentMoles.Clear();
     }
-    private void LoadHighScore()
-    {
-        // Load the high score from PlayerPrefs
-        if (PlayerPrefs.HasKey(HIGH_SCORE_KEY))
-        {
+
+    private void LoadHighScore() {
+        if (PlayerPrefs.HasKey(HIGH_SCORE_KEY)) {
             gamePlayingHighTimer = PlayerPrefs.GetFloat(HIGH_SCORE_KEY);
         }
-        else
-        {
-            // Set a default high score if it's the first time playing
+        else {
             gamePlayingHighTimer = 0f;
         }
     }
 
-    private void SaveHighScore()
-    {
-        // Save the high score to PlayerPrefs
+    private void SaveHighScore() {
         PlayerPrefs.SetFloat(HIGH_SCORE_KEY, gamePlayingHighTimer);
         PlayerPrefs.Save();
     }
 
-    public bool IsGamePlaying()
-    {
+    private void SetLevelDifficulties() {
+        timeBetweenMoleSpawns = levelDifficultySO.GetTimeBetweenMoleSpawns();
+        levelDifficulty = levelDifficultySO.GetLevelDifficulty();
+    }
+
+    public bool IsGamePlaying() {
         return state == State.GamePlaying;
     }
-    
-    public bool IsGameOver()
-    {
+
+    public bool IsGameOver() {
         return state == State.GameOver;
     }
-    
-    public float GetGamePlayinTimerNormalized()
-    {
+
+    public float GetGamePlayinTimerNormalized() {
         return 1 - (gamePlayingTimer / gamePlayingTimerMax);
     }
 
-    public void TogglePauseGame()
-    {
+    public void TogglePauseGame() {
         isGamePaused = !isGamePaused;
-        if (isGamePaused)
-        {
+        if (isGamePaused) {
             Time.timeScale = 0f;
             OnGamePaused?.Invoke(this, EventArgs.Empty);
         }
-        else
-        {
+        else {
             Time.timeScale = 1f;
             OnGameUnpaused?.Invoke(this, EventArgs.Empty);
         }
     }
-    public void GameOver()
-    {
-        if (gamePlayingTimer > gamePlayingHighTimer)
-        {
+
+    public void GameOver() {
+        if (gamePlayingTimer > gamePlayingHighTimer) {
             gamePlayingHighTimer = gamePlayingTimer;
             SaveHighScore();
             isNewBest = true;
         }
-        foreach (Mole mole in moles)
-        {
+        foreach (Mole mole in moles) {
             mole.StopGame();
         }
         state = State.GameOver;
         OnStateChanged?.Invoke(this, EventArgs.Empty);
     }
-    public float GetMolesPerSecond()
-    {
+
+    public float GetMolesPerSecond() {
         return gamePlayingTimer;
     }
-    public float GetGamePlayingHighTimer()
-    {
-        if (PlayerPrefs.HasKey(HIGH_SCORE_KEY))
-        {
+
+    public float GetGamePlayingHighTimer() {
+        if (PlayerPrefs.HasKey(HIGH_SCORE_KEY)) {
             gamePlayingHighTimer = PlayerPrefs.GetFloat(HIGH_SCORE_KEY);
         }
-        else
-        {
-            // Set a default high score if it's the first time playing
+        else {
             gamePlayingHighTimer = 0f;
         }
         return gamePlayingHighTimer;
     }
-    public bool GetIsNewBest()
-    {
+
+    public bool GetIsNewBest() {
         return isNewBest;
     }
-    public void MoleMissed(int moleIndex, bool isMole)
-    {
-        // Remove from active moles.
+
+    public void MoleMissed(int moleIndex, bool isMole) {
         currentMoles.Remove(moles[moleIndex]);
 
-        if (isMole)
-        {
+        if (isMole) {
             GameOver();
         }
     }
-    public void MoleHited(int moleIndex)
-    {
-        // Remove from active moles.
+
+    public void MoleHited(int moleIndex) {
         currentMoles.Remove(moles[moleIndex]);
     }
 }
