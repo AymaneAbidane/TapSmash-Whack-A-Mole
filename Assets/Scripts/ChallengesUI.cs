@@ -38,17 +38,17 @@ public class ChallengesUI : MonoBehaviour
         Instantiate(holder.gameObject);
         StartCoroutine(CheckLevelToLoad(holder));
     }
-
+    
     private IEnumerator CheckLevelToLoad(ChallengeDataHolder holder) {
         yield return new WaitForSeconds(.3f);
         if (holder == easy) {
             Loader.Load(Loader.Scene.BeginnerChallengeScene);
         }
         else if (holder == skilled) {
-            Loader.Load(Loader.Scene.SkilledChallengeScene);
+            Loader.Load(Loader.Scene.BeginnerChallengeScene);
         }
         else if (holder == master) {
-            Loader.Load(Loader.Scene.MasterChallengeScene);
+            Loader.Load(Loader.Scene.BeginnerChallengeScene);
         }
     }
 
