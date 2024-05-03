@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TMPro.TextMeshProUGUI molesPerSecondText;
     [SerializeField] private TextMeshProUGUI bestMolesPerSecondText;
     [SerializeField] private Button resumeButton;
-    [SerializeField] private float timeBetweenMoleSpawns = 2f;
+    [SerializeField] private float timeBetweenMoleSpawns = 1.5f;
 
     private void Awake()
     {

@@ -41,7 +41,7 @@ public class Mole : MonoBehaviour
 
     // How long it takes to show a mole
     private float showMoleDuration = .5f;
-    private float showMoleFullAnimationDuration = 1.5f;
+    private float showMoleFullAnimationDuration = 1f;
     private float hardMoleRate = 0.25f;
     private float bombRate = 0f;
     private int moleLives;
