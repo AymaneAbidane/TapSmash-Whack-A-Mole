@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3a5c62b70e743646ac4b1f562a05d87, type: 3}
   m_Name: HardLevelDifficultySO
   m_EditorClassIdentifier: 
-  timeBetweenMoleSpawns: 2
-  levelDifficulty: 5
+  timeBetweenMoleSpawns: 1.5
+  levelDifficulty: 20
