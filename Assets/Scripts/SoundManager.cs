@@ -6,71 +6,122 @@ using UnityEngine.Rendering;
 public class SoundManager : MonoBehaviour
 {
 
-    //const string PLAYER_PREFS_SOUND_EFFECTS_VOLUME = "SoundEffectsVolume";
-    //public static SoundManager Instance { get; private set; }
+    const string PLAYER_PREFS_SOUND_EFFECTS_VOLUME = "SoundEffectsVolume";
+    const string PLAYER_PREFS_SOUND_MUTED = "SoundMuted";
+
+    public static SoundManager Instance { get; private set; }
     
-    //[SerializeField] AudioClipRefsSO audioClipRefsSO;
-    //private float volume = 1f;
+    [SerializeField] AudioClipRefsSO audioClipRefsSO;
+    // private AudioSource audioSource;
 
-    //private void Awake() {
-    //    Instance = this;
+    private bool soundMuted = false;
 
-    //    volume = PlayerPrefs.GetFloat(PLAYER_PREFS_SOUND_EFFECTS_VOLUME, 1f);
-    //}
-    //private void Start()
-    //{
-    //    DeliveryManager.Instance.OnRecipeSuccess += DeliveryManager_OnRecipeSuccess;
-    //    DeliveryManager.Instance.OnRecipeFailed += DeliveryManager_OnRecipeFailed;
-    //    CuttingCounter.OnAnyCut += CuttingCounter_OnAnyCut;
-    //    Player.OnPickedSomething += Player_OnPickedSomething;
-    //    BaseCounter.OnAnyObjectPlacedHere += BaseCounter_OnAnyObjectPlacedHere;
-    //    TrashCounter.OnAnyObjectTrashed += TrashCounter_OnAnyObjectTrashed;
-    //}
+    private float volume = 1f;
 
-    //private void TrashCounter_OnAnyObjectTrashed(object sender, System.EventArgs e)
-    //{
-    //    TrashCounter trashCounter = sender as TrashCounter;
-    //    PlaySound(audioClipRefsSO.trash, trashCounter .transform.position);
-    //}
+    private void Awake() {
+        Instance = this;
+    
+        soundMuted = PlayerPrefs.GetInt(PLAYER_PREFS_SOUND_MUTED, 0) == 1;
 
-    //private void BaseCounter_OnAnyObjectPlacedHere(object sender, System.EventArgs e)
-    //{
-    //    BaseCounter baseCounter = sender as BaseCounter;
-    //    PlaySound(audioClipRefsSO.objectDrop, baseCounter.transform.position);
-    //}
+        volume = PlayerPrefs.GetFloat(PLAYER_PREFS_SOUND_EFFECTS_VOLUME, 1f);
 
-    //private void Player_OnPickedSomething(object sender, System.EventArgs e)
-    //{
-    //    PlaySound(audioClipRefsSO.objectPickup, Player.Instance.transform.position);
-    //}
+        // audioSource.volume = soundMuted ? 0 : volume;
+    }
+    private void Start()
+    {
+        if (Mole.Instance != null)
+        {
+            Mole.Instance.OnMoleHided += Mole_OnMoleHided;
+            Mole.Instance.OnMoleHited += Mole_OnMoleHited;
+            Mole.Instance.OnMoleMissed += Mole_OnMoleMissed;
+            Mole.Instance.OnMoleShowed += Mole_OnMoleShowed;
+        }
 
-    //private void CuttingCounter_OnAnyCut(object sender, System.EventArgs e)
-    //{
-    //    CuttingCounter cuttingCounter = sender as CuttingCounter;
-    //    PlaySound(audioClipRefsSO.chop, cuttingCounter.transform.position);
-    //}
+        if (MainMenuUI.Instance != null)
+        {
+            MainMenuUI.Instance.OnClickSound += MainMenuUI_OnClickSound;
+        }
 
-    //private void DeliveryManager_OnRecipeFailed(object sender, System.EventArgs e)
-    //{
-    //    DeliveryCounter deliveryCounter = DeliveryCounter.Instance;
-    //    PlaySound(audioClipRefsSO.deliveryFail, deliveryCounter.transform.position);
-    //}
+        if (GameOverUI.Instance != null)
+        {
+            GameOverUI.Instance.OnClickSound += GameOverUI_OnClickSound;
+        }
 
-    //private void DeliveryManager_OnRecipeSuccess(object sender, System.EventArgs e)
-    //{
-    //    DeliveryCounter deliveryCounter = DeliveryCounter.Instance;
-    //    PlaySound(audioClipRefsSO.deliverySuccess, deliveryCounter.transform.position);
-    //}
+        if (GamePauseUI.Instance != null)
+        {
+            GamePauseUI.Instance.OnClickSound += GamePauseUI_OnClickSound;
+        }
 
-    //void PlaySound(AudioClip[] audioClipArray, Vector3 position, float volume = 1f)
-    //{
-    //    PlaySound(audioClipArray[Random.Range(0, audioClipArray.Length)], position, volume);
-    //}
+        if (ChallengesUI.Instance != null)
+        {
+            ChallengesUI.Instance.OnClickSound += ChallengesUI_OnClickSound;
+        }
+    }
 
-    //void PlaySound(AudioClip audioClip, Vector3 position, float volumeMultiplier = 1f)
-    //{
-    //    AudioSource.PlayClipAtPoint(audioClip, position, volumeMultiplier * volume);
-    //}
+    private void Mole_OnMoleHided(object sender, System.EventArgs e)
+    {
+        PlaySound(audioClipRefsSO.moleHided, Camera.main.transform.position);
+        Debug.Log("Mole_OnMoleHided");
+    }
+
+    private void Mole_OnMoleHited(object sender, System.EventArgs e)
+    {
+        Debug.Log("Mole_OnMoleHited");
+        PlaySound(audioClipRefsSO.moleHit, Camera.main.transform.position);
+    }
+
+    private void Mole_OnMoleMissed(object sender, System.EventArgs e)
+    {
+        Debug.Log("Mole_OnMoleMissed");
+        PlaySound(audioClipRefsSO.moleMiss, Camera.main.transform.position);
+    }
+
+    private void Mole_OnMoleShowed(object sender, System.EventArgs e)
+    {
+        Debug.Log("Mole_OnMoleShowed");
+        PlaySound(audioClipRefsSO.moleShow, Camera.main.transform.position);
+    }
+    private void MainMenuUI_OnClickSound(object sender, System.EventArgs e)
+    {
+        Debug.Log("MainMenuUI_OnClickSound");
+        PlaySound(audioClipRefsSO.click, Camera.main.transform.position);
+    }
+    private void GameOverUI_OnClickSound(object sender, System.EventArgs e)
+    {
+        Debug.Log("GameOverUI_OnClickSound");
+        PlaySound(audioClipRefsSO.click, Camera.main.transform.position);
+    }
+    private void GamePauseUI_OnClickSound(object sender, System.EventArgs e)
+    {
+        Debug.Log("GamePauseUI_OnClickSound");
+        PlaySound(audioClipRefsSO.click, Camera.main.transform.position);
+    }
+    private void ChallengesUI_OnClickSound(object sender, System.EventArgs e)
+    {
+        Debug.Log("ChallengesUI_OnClickSound");
+        PlaySound(audioClipRefsSO.click, Camera.main.transform.position);
+    }
+    private void PlaySound(AudioClip audioClip, Vector3 position, float volumeMultiplier = 1.1f)
+    {
+       AudioSource.PlayClipAtPoint(audioClip, position, volumeMultiplier * volume);
+    }
+    
+    public void ToggleSound()
+    {
+        soundMuted = !soundMuted;
+        PlayerPrefs.SetInt(PLAYER_PREFS_SOUND_MUTED, soundMuted ? 1 : 0);
+        PlayerPrefs.Save();
+        
+        volume = soundMuted ? 0f : 1f;
+        // audioSource.volume = soundMuted ? 0 : volume;
+    }
+    public float GetVolume() {
+       return volume;
+    }
+    public bool IsSoundMuted()
+    {
+        return soundMuted;
+    }
     //public void PlayFootStepsSound(Vector3 position, float volume) { 
     //    PlaySound(audioClipRefsSO.footStep,position,volume);
     //}
@@ -82,8 +133,5 @@ public class SoundManager : MonoBehaviour
 
     //    PlayerPrefs.SetFloat(PLAYER_PREFS_SOUND_EFFECTS_VOLUME, volume);
     //    PlayerPrefs.Save();
-    //}
-    //public float GetVolume() {
-    //    return volume;
     //}
 }

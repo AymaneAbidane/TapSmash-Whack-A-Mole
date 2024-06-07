@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,17 +7,22 @@ using UnityEngine.UI;
 
 public class GamePauseUI : MonoBehaviour
 {
+    public event EventHandler OnClickSound;
+    public static GamePauseUI Instance { get; private set; }
     [SerializeField] Button resumeButton;
     [SerializeField] Button challengesButton;
 
     private void Awake()
     {
+        Instance = this;
         resumeButton.onClick.AddListener(() =>
         {
+            OnClickSound?.Invoke(this, EventArgs.Empty);
             GameManager.Instance.TogglePauseGame();
         });
         challengesButton.onClick.AddListener(() =>
         {
+            OnClickSound?.Invoke(this, EventArgs.Empty);
             Loader.Load(Loader.Scene.ChallengesScene);
         });
     }

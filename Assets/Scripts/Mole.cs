@@ -3,7 +3,14 @@ using System.Collections;
 using UnityEngine;
 
 public class Mole : MonoBehaviour {
+
+    public event EventHandler OnMoleShowed;
+    public event EventHandler OnMoleHited;
+    public event EventHandler OnMoleMissed;
+    public event EventHandler OnMoleHided;
+
     public static Mole Instance { get; private set; }
+
     public enum MoleType { Standard, HardHat, Bomb };
 
     private MoleType moleType;
@@ -25,8 +32,8 @@ public class Mole : MonoBehaviour {
     private Vector2 boxColliderOffsetHidden;
     private Vector2 boxColliderSizeHidden;
 
-    private float showMoleDuration = 0.4f; // Reduced duration for faster display
-    private float showMoleFullAnimationDuration = 0.8f; // Reduced duration for faster display
+    private float showMoleDuration = 0.5f; // Reduced duration for faster display
+    private float showMoleFullAnimationDuration = 0.9f; // Reduced duration for faster display
     private float hardMoleRate = 0.3f; // Increased rate of hard hat moles
     private float bombRate = 0.05f; // Increased rate of bomb moles
     private int moleLives;
@@ -55,8 +62,11 @@ public class Mole : MonoBehaviour {
             switch (moleType) {
                 case MoleType.Standard:
                     spriteRenderer.sprite = moleHitedSprite;
+
                     GameManager.Instance.MoleHited(moleIndex);
+                    
                     StopAllCoroutines();
+                    OnMoleHited?.Invoke(this, EventArgs.Empty); // Invoke OnMoleHited
                     StartCoroutine(QuickHide());
                     isHitable = false;
                     break;
@@ -67,13 +77,18 @@ public class Mole : MonoBehaviour {
                     }
                     else {
                         spriteRenderer.sprite = moleHatHitedSprite;
+
                         GameManager.Instance.MoleHited(moleIndex);
                         StopAllCoroutines();
+                        OnMoleHited?.Invoke(this, EventArgs.Empty); // Invoke OnMoleHited
+
                         StartCoroutine(QuickHide());
                         isHitable = false;
                     }
                     break;
                 case MoleType.Bomb:
+                OnMoleMissed?.Invoke(this, EventArgs.Empty); // Invoke OnMoleMissed
+
                     StopGame();
                     GameManager.Instance.GameOver();
                     break;
@@ -99,8 +114,10 @@ public class Mole : MonoBehaviour {
         boxCollider2D.offset = boxColliderOffset;
         boxCollider2D.size = boxColliderSize;
 
+        OnMoleShowed?.Invoke(this, EventArgs.Empty); // Invoke OnMoleShowed
+        
         yield return new WaitForSeconds(showMoleFullAnimationDuration);
-
+        
         elapsed = 0f;
         while (elapsed < showMoleDuration) {
             transform.localPosition = Vector2.Lerp(moleEndingPosition, moleStartingPosition, elapsed / showMoleDuration);
@@ -114,15 +131,19 @@ public class Mole : MonoBehaviour {
         boxCollider2D.offset = boxColliderOffsetHidden;
         boxCollider2D.size = boxColliderSizeHidden;
 
+        OnMoleHided?.Invoke(this, EventArgs.Empty); // Invoke OnMoleHided
+
         if (isHitable) {
             isHitable = false;
             if (moleType != MoleType.Bomb) {
                 GameManager.Instance.MoleMissed(moleIndex, moleType != MoleType.Bomb);
+                OnMoleMissed?.Invoke(this, EventArgs.Empty); // Invoke OnMoleMissed
             }
         }
     }
 
     private IEnumerator QuickHide() {
+        
         yield return new WaitForSeconds(0.25f);
 
         if (!isHitable) {
@@ -134,6 +155,7 @@ public class Mole : MonoBehaviour {
         transform.localPosition = moleStartPosition;
         boxCollider2D.offset = boxColliderOffsetHidden;
         boxCollider2D.size = boxColliderSizeHidden;
+        OnMoleHided?.Invoke(this, EventArgs.Empty); // Invoke OnMoleHided
     }
 
     private void CreateNext() {
@@ -178,4 +200,3 @@ public class Mole : MonoBehaviour {
         StopAllCoroutines();
     }
 }
-

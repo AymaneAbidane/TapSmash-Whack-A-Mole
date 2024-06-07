@@ -116,7 +116,10 @@ public class GameManager : MonoBehaviour {
         timeBetweenMoleSpawns = levelDifficultySO.GetTimeBetweenMoleSpawns();
         levelDifficulty = levelDifficultySO.GetLevelDifficulty();
     }
-
+    private void UpdateLevelBasedOnScore() {
+        float increaseRate = 0.5f; // Adjust this value as needed
+        levelDifficulty += Mathf.FloorToInt(Time.deltaTime * increaseRate);
+    }
     public bool IsGamePlaying() {
         return state == State.GamePlaying;
     }
@@ -182,5 +185,6 @@ public class GameManager : MonoBehaviour {
 
     public void MoleHited(int moleIndex) {
         currentMoles.Remove(moles[moleIndex]);
+        UpdateLevelBasedOnScore();
     }
 }

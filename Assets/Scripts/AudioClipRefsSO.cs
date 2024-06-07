@@ -5,5 +5,5 @@ using UnityEngine;
 [CreateAssetMenu()]
 public class AudioClipRefsSO : ScriptableObject
 {
-    public AudioClip moleHit,moleMiss,timeRemaining, moleShow;
+    public AudioClip moleHit,moleMiss,click, moleShow,moleHided;
 }

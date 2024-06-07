@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class MainMenuUI : MonoBehaviour
 {
+    public event EventHandler OnClickSound;
+    public static MainMenuUI Instance { get; private set; }
     [SerializeField] Button goToLevelsButton;
     [SerializeField] Button soundButton;
     [SerializeField] Button musicButton;
@@ -21,24 +23,31 @@ public class MainMenuUI : MonoBehaviour
 
     private void Awake()
     {
+        Instance = this;
         goToLevelsButton.onClick.AddListener(() => {
             Loader.Load(Loader.Scene.ChallengesScene);
+            OnClickSound?.Invoke(this, EventArgs.Empty);
         });
         soundButton.onClick.AddListener(() => {
-            MusicManager.Instance.ToggleSound();
+            SoundManager.Instance.ToggleSound();
+            OnClickSound?.Invoke(this, EventArgs.Empty);
             UpdateSoundButton();
         });
         musicButton.onClick.AddListener(() => {
             MusicManager.Instance.ToggleMusic();
+            OnClickSound?.Invoke(this, EventArgs.Empty);
             UpdateMusicButton();
         });
         tcButton.onClick.AddListener(() => {
+            OnClickSound?.Invoke(this, EventArgs.Empty);
             Application.OpenURL("https://sites.google.com/view/");
         });
         ppButton.onClick.AddListener(() => {
+            OnClickSound?.Invoke(this, EventArgs.Empty);
             Application.OpenURL("https://sites.google.com/view/");
         });
         quitButton.onClick.AddListener(() => {
+            OnClickSound?.Invoke(this, EventArgs.Empty);
             Application.Quit();
         });
 
@@ -55,7 +64,7 @@ public class MainMenuUI : MonoBehaviour
 
     private void UpdateSoundButton()
     {
-        if (MusicManager.Instance.IsSoundMuted())
+        if (SoundManager.Instance.IsSoundMuted())
             soundButton.image.sprite = soundOffSprite;
         else
             soundButton.image.sprite = soundOnSprite;

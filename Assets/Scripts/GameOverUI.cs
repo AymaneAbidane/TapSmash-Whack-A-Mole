@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class GameOverUI : MonoBehaviour
 {
+    public event EventHandler OnClickSound;
+    public static GameOverUI Instance { get; private set; }
     [SerializeField] private Button tryAgainButton;
     [SerializeField] private Button challengesButton;
     [SerializeField] private Button mainMenuButton;
@@ -17,13 +20,17 @@ public class GameOverUI : MonoBehaviour
 
     private void Awake()
     {
+        Instance = this;
         tryAgainButton.onClick.AddListener(() => {
+            OnClickSound?.Invoke(this, EventArgs.Empty);
             Loader.Load(Loader.Scene.BeginnerChallengeScene);
         });
         challengesButton.onClick.AddListener(() => {
+            OnClickSound?.Invoke(this, EventArgs.Empty);
             Loader.Load(Loader.Scene.ChallengesScene);
         });
         mainMenuButton.onClick.AddListener(() => {
+            OnClickSound?.Invoke(this, EventArgs.Empty);
             Loader.Load(Loader.Scene.MainMenuScene);
         });
     }

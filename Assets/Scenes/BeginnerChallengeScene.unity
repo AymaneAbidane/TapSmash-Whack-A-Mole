@@ -691,8 +691,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4282923234
-  m_fontColor: {r: 0.8862745, g: 0.21960784, b: 0.282353, a: 1}
+    rgba: 4292800229
+  m_fontColor: {r: 0.8980393, g: 0.9333334, b: 0.8705883, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1073,7 +1073,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 532122ecfac7a417192fe92f11e041c7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 25dbde4a3c4a44d018aef8b9be619f6d, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1962,6 +1962,63 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7793094679417481768, guid: fbb513d4b0224424f8901016da3eb7ca, type: 3}
   m_PrefabInstance: {fileID: 1003517036}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1119249081
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1283754411518685541, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283754411518685541, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283754411518685541, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283754411518685541, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283754411518685541, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283754411518685541, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283754411518685541, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283754411518685541, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283754411518685541, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1283754411518685541, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4041550989249761085, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
+      propertyPath: m_Name
+      value: SoundManager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 821c0e32299f34ce996606d6deac461d, type: 3}
 --- !u!1 &1317051004
 GameObject:
   m_ObjectHideFlags: 0
@@ -3482,8 +3539,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+    rgba: 4292800229
+  m_fontColor: {r: 0.8980392, g: 0.93333334, b: 0.87058824, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3736,3 +3793,4 @@ SceneRoots:
   - {fileID: 1390989146}
   - {fileID: 729140578}
   - {fileID: 45663418}
+  - {fileID: 1119249081}
