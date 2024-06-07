@@ -12,7 +12,7 @@ public class SoundManager : MonoBehaviour
     public static SoundManager Instance { get; private set; }
     
     [SerializeField] AudioClipRefsSO audioClipRefsSO;
-    // private AudioSource audioSource;
+     [SerializeField] private AudioSource audioSource;
 
     private bool soundMuted = false;
 
@@ -60,7 +60,9 @@ public class SoundManager : MonoBehaviour
 
     private void Mole_OnMoleHided(object sender, System.EventArgs e)
     {
-        PlaySound(audioClipRefsSO.moleHided, Camera.main.transform.position);
+        // PlaySound(audioClipRefsSO.moleHided, Camera.main.transform.position);
+        audioSource.PlayOneShot(audioClipRefsSO.moleHided);
+
         Debug.Log("Mole_OnMoleHided");
     }
 
@@ -79,7 +81,8 @@ public class SoundManager : MonoBehaviour
     private void Mole_OnMoleShowed(object sender, System.EventArgs e)
     {
         Debug.Log("Mole_OnMoleShowed");
-        PlaySound(audioClipRefsSO.moleShow, Camera.main.transform.position);
+        audioSource.PlayOneShot(audioClipRefsSO.moleShow);
+        // PlaySound(audioClipRefsSO.moleShow, Camera.main.transform.position);
     }
     private void MainMenuUI_OnClickSound(object sender, System.EventArgs e)
     {
