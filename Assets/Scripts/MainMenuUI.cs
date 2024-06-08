@@ -64,10 +64,10 @@ public class MainMenuUI : MonoBehaviour
 
     private void UpdateSoundButton()
     {
-        if (SoundManager.Instance.IsSoundMuted())
-            soundButton.image.sprite = soundOffSprite;
-        else
-            soundButton.image.sprite = soundOnSprite;
+        // if (SoundManager.Instance.IsSoundMuted())
+        //     soundButton.image.sprite = soundOffSprite;
+        // else
+        //     soundButton.image.sprite = soundOnSprite;
     }
 
     private void UpdateMusicButton()

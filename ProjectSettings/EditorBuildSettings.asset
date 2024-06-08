@@ -17,10 +17,4 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/BeginnerChallengeScene.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 0
-    path: Assets/Scenes/SkilledChallengeScene.unity
-    guid: cbf4d129115364573b62bad7856055a3
-  - enabled: 0
-    path: Assets/Scenes/MasterChallengeScene.unity
-    guid: e632ce4fbcc0f433096d0610e64f0add
   m_configObjects: {}
